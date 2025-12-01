@@ -5,25 +5,21 @@
       "src": "package.json",
       "use": "@vercel/static-build",
       "config": { "distDir": "dist" }
-    }
-  ],
-  "routes": [
-    { "handle": "filesystem" },
-    { "src": "/(.*)", "dest": "/index.html" }
-  ]
-}
-{
-  "version": 2,
-  "builds": [
+    },
     {
       "src": "src/index-mongo.ts",
       "use": "@vercel/node"
     }
   ],
   "routes": [
+    { "handle": "filesystem" },
+    {
+      "src": "/api/(.*)",
+      "dest": "src/index-mongo.ts"
+    },
     {
       "src": "/(.*)",
-      "dest": "src/index-mongo.ts"
+      "dest": "/index.html"
     }
   ]
 }
