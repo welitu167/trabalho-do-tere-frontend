@@ -1,0 +1,17 @@
+:root{
+  --bg:#f6f8fb;
+  --card:#ffffff;
+  --accent:#2b6cb0;
+  --muted:#6b7280;
+  --danger:#e02424;
+}
+*{box-sizing:border-box;font-family:Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;}
+body{margin:0;background:var(--bg);display:flex;align-items:center;justify-content:center;min-height:100vh;padding:24px;color:#0b1220}
+.container{width:100%;max-width:720px;background:var(--card);padding:20px;border-radius:12px;box-shadow:0 8px 30px rgba(12,18,31,0.08)}
+h1{margin:0 0 12px}
+.product-summary{margin-bottom:12px;color:#111827}
+#payment-element{margin-top:12px}
+#submit{margin-top:14px;background:var(--accent);color:white;padding:12px 14px;border-radius:8px;border:0;font-weight:600;cursor:pointer}
+#submit:disabled{opacity:0.6;cursor:not-allowed}
+.message{color:var(--muted);margin-bottom:8px}
+.error{color:var(--danger);min-height:1.2em;margin-top:8px}

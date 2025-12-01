@@ -1,0 +1,331 @@
+/* Login.css */
+.login-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab, #667eea, #764ba2);
+  background-size: 400% 400%;
+  animation: gradientShift 12s ease infinite;
+  position: relative;
+  overflow: hidden;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  flex-direction: column;
+  padding: 20px;
+}
+
+/* Texto acima do formulário - BRANCO E ELEGANTE */
+.brand-text {
+  position: relative;
+  margin-bottom: 40px;
+  font-size: 3.5rem;
+  font-weight: 700;
+  color: #ffffff;
+  text-align: center;
+  z-index: 10;
+  text-transform: uppercase;
+  font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+  letter-spacing: 6px;
+  text-shadow: 
+    0 2px 4px rgba(0, 0, 0, 0.3),
+    0 4px 12px rgba(0, 0, 0, 0.2),
+    0 0 20px rgba(255, 255, 255, 0.3);
+  animation: textGlow 3s ease-in-out infinite alternate;
+  padding: 0 20px;
+}
+
+@keyframes textGlow {
+  0% {
+    text-shadow: 
+      0 2px 4px rgba(0, 0, 0, 0.3),
+      0 4px 12px rgba(0, 0, 0, 0.2),
+      0 0 20px rgba(255, 255, 255, 0.3);
+  }
+  100% {
+    text-shadow: 
+      0 2px 6px rgba(0, 0, 0, 0.4),
+      0 6px 18px rgba(0, 0, 0, 0.3),
+      0 0 30px rgba(255, 255, 255, 0.5),
+      0 0 40px rgba(255, 255, 255, 0.2);
+  }
+}
+
+/* Linha decorativa abaixo do texto */
+.brand-text::after {
+  content: '';
+  position: absolute;
+  bottom: -15px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100px;
+  height: 2px;
+  background: linear-gradient(90deg, 
+    transparent 0%, 
+    rgba(255, 255, 255, 0.9) 50%, 
+    transparent 100%);
+  border-radius: 1px;
+  animation: linePulse 2s ease-in-out infinite;
+}
+
+@keyframes linePulse {
+  0%, 100% {
+    opacity: 0.8;
+    width: 80px;
+  }
+  50% {
+    opacity: 1;
+    width: 120px;
+  }
+}
+
+/* Animação principal do gradiente */
+@keyframes gradientShift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+/* Partículas sutis */
+.particles {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: 
+    radial-gradient(circle at 20% 80%, rgba(255, 255, 255, 0.08) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.05) 0%, transparent 50%);
+  animation: particleMove 15s ease-in-out infinite;
+  z-index: 1;
+}
+
+@keyframes particleMove {
+  0%, 100% {
+    transform: translate(0, 0) scale(1);
+  }
+  33% {
+    transform: translate(-15px, -8px) scale(1.02);
+  }
+  66% {
+    transform: translate(10px, 12px) scale(0.98);
+  }
+}
+
+.login-form {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  padding: 50px 40px;
+  border-radius: 24px;
+  box-shadow: 
+    0 25px 50px rgba(0, 0, 0, 0.15),
+    0 0 0 1px rgba(255, 255, 255, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.6);
+  width: 100%;
+  max-width: 420px;
+  min-width: 280px;
+  position: relative;
+  z-index: 5;
+  transition: all 0.4s ease;
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  margin: 0 auto;
+}
+
+.login-form:hover {
+  transform: translateY(-5px);
+  box-shadow: 
+    0 35px 60px rgba(0, 0, 0, 0.2),
+    0 0 0 1px rgba(255, 255, 255, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.7);
+}
+
+/* Título do formulário */
+.login-title {
+  text-align: center;
+  margin-bottom: 35px;
+  color: #2c3e50;
+  font-size: 1.8rem;
+  font-weight: 600;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  letter-spacing: 0.5px;
+}
+
+/* Resto do CSS */
+.form-group {
+  margin-bottom: 24px;
+  position: relative;
+}
+
+.form-input {
+  width: 100%;
+  padding: 16px 20px;
+  border: 1.5px solid #e1e5e9;
+  border-radius: 12px;
+  font-size: 15px;
+  transition: all 0.3s ease;
+  background-color: rgba(255, 255, 255, 0.9);
+  box-sizing: border-box;
+  font-weight: 400;
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: #667eea;
+  background-color: white;
+  box-shadow: 
+    0 0 0 3px rgba(102, 126, 234, 0.15),
+    inset 0 1px 3px rgba(0, 0, 0, 0.05);
+  transform: translateY(-2px);
+}
+
+.form-input::placeholder {
+  color: #a0a4a8;
+  font-weight: 400;
+}
+
+.error-message {
+  background: linear-gradient(135deg, #fee, #fff5f5);
+  color: #c33;
+  padding: 14px 16px;
+  border-radius: 10px;
+  margin-bottom: 20px;
+  border-left: 4px solid #c33;
+  font-size: 14px;
+  animation: shake 0.5s ease-in-out;
+  box-shadow: 0 4px 12px rgba(195, 51, 51, 0.1);
+  font-weight: 500;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-5px); }
+  75% { transform: translateX(5px); }
+}
+
+.login-button {
+  width: 100%;
+  padding: 17px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+  letter-spacing: 0.5px;
+}
+
+.login-button:hover:not(:disabled) {
+  transform: translateY(-3px);
+  box-shadow: 
+    0 15px 35px rgba(102, 126, 234, 0.4),
+    0 0 0 1px rgba(255, 255, 255, 0.3);
+  background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+}
+
+.login-button:active:not(:disabled) {
+  transform: translateY(-1px);
+}
+
+.login-button:disabled {
+  background: linear-gradient(135deg, #a0a4a8, #c5c9cc);
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: 0 4px 15px rgba(160, 164, 168, 0.2);
+}
+
+.loading-spinner {
+  display: inline-block;
+  width: 18px;
+  height: 18px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  border-top-color: #ffffff;
+  animation: spin 1s ease-in-out infinite;
+  margin-right: 8px;
+  vertical-align: middle;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+  .brand-text {
+    font-size: 2.8rem;
+    letter-spacing: 4px;
+    margin-bottom: 30px;
+  }
+  
+  .login-form {
+    margin: 0 auto;
+    padding: 40px 30px;
+    width: calc(100% - 40px);
+    max-width: 400px;
+  }
+}
+
+@media (max-width: 480px) {
+  .login-container {
+    padding: 15px;
+  }
+  
+  .brand-text {
+    font-size: 2.2rem;
+    letter-spacing: 3px;
+    margin-bottom: 25px;
+    padding: 0 15px;
+  }
+  
+  .brand-text::after {
+    width: 60px;
+    bottom: -12px;
+  }
+  
+  .login-form {
+    padding: 35px 25px;
+    width: calc(100% - 50px);
+    max-width: 100%;
+    min-width: auto;
+  }
+  
+  .login-title {
+    font-size: 1.6rem;
+  }
+  
+  .form-input {
+    padding: 14px 16px;
+    font-size: 14px;
+  }
+  
+  .login-button {
+    padding: 15px;
+    font-size: 15px;
+  }
+}
+
+/* Para telas muito grandes */
+@media (min-width: 1440px) {
+  .brand-text {
+    font-size: 4rem;
+    letter-spacing: 8px;
+    margin-bottom: 50px;
+  }
+  
+  .login-form {
+    max-width: 450px;
+  }
+}

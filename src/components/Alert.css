@@ -1,0 +1,50 @@
+.alert-toast-container{
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  z-index: 9999;
+}
+
+.alert-toast{
+  min-width: 220px;
+  max-width: 360px;
+  color: #fff;
+  padding: 12px 16px;
+  border-radius: 8px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.15);
+  font-size: 14px;
+  animation: slideIn .22s ease-out;
+}
+.alert-toast.success{ background: linear-gradient(90deg,#28a745,#45c36b); }
+.alert-toast.error{ background: linear-gradient(90deg,#d9534f,#ff6b6b); }
+.alert-toast.info{ background: linear-gradient(90deg,#007bff,#3aa0ff); }
+
+@keyframes slideIn{
+  from { transform: translateY(-8px); opacity: 0 }
+  to { transform: translateY(0); opacity: 1 }
+}
+
+.alert-modal-overlay{
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+}
+.alert-modal{
+  background: #fff;
+  padding: 18px;
+  border-radius: 10px;
+  box-shadow: 0 10px 40px rgba(2,6,23,0.2);
+  min-width: 320px;
+}
+.alert-modal p{ margin: 0 0 12px 0 }
+.alert-modal input{ width: 100%; padding: 8px; margin-bottom: 12px; border: 1px solid #ddd; border-radius: 6px }
+.alert-modal-actions{ display:flex; gap:8px; justify-content:flex-end }
+.alert-modal-actions .primary{ background:#007bff; color:#fff; border:none; padding:8px 12px; border-radius:6px }
+.alert-modal-actions .secondary{ background:#f0f0f0; color:#333; border:none; padding:8px 12px; border-radius:6px }

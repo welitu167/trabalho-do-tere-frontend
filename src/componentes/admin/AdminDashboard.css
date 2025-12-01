@@ -1,0 +1,218 @@
+/* AdminDashboard.css */
+
+.admin-dashboard {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #f5f5f5;
+  min-height: 100vh;
+}
+
+.admin-dashboard h2 {
+  color: #2c3e50;
+  text-align: center;
+  margin-bottom: 30px;
+  font-size: 2.5rem;
+  font-weight: 600;
+  border-bottom: 3px solid #3498db;
+  padding-bottom: 10px;
+}
+
+.admin-dashboard h3 {
+  color: #34495e;
+  margin: 30px 0 20px 0;
+  font-size: 1.8rem;
+  font-weight: 500;
+  border-left: 4px solid #e74c3c;
+  padding-left: 15px;
+}
+
+.erro-mensagem {
+  background-color: #e74c3c;
+  color: white;
+  padding: 12px 20px;
+  border-radius: 8px;
+  margin-bottom: 25px;
+  text-align: center;
+  font-weight: 500;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Estilos para as listas */
+.usuarios-lista,
+.carrinhos-lista {
+  background: white;
+  border-radius: 12px;
+  padding: 0;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  margin-bottom: 30px;
+  overflow: hidden;
+}
+
+.usuarios-lista li,
+.carrinhos-lista li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 20px;
+  border-bottom: 1px solid #ecf0f1;
+  transition: background-color 0.3s ease;
+}
+
+.usuarios-lista li:hover,
+.carrinhos-lista li:hover {
+  background-color: #f8f9fa;
+}
+
+.usuarios-lista li:last-child,
+.carrinhos-lista li:last-child {
+  border-bottom: none;
+}
+
+/* Informações dos itens */
+.item-info {
+  flex: 1;
+  color: #2c3e50;
+  font-size: 1rem;
+}
+
+.usuario-info {
+  font-weight: 500;
+}
+
+.usuario-email {
+  color: #7f8c8d;
+  font-size: 0.9rem;
+  margin-left: 10px;
+}
+
+.usuario-tipo {
+  background-color: #3498db;
+  color: white;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  margin-left: 10px;
+  font-weight: 500;
+}
+
+.carrinho-info {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.carrinho-usuario {
+  font-weight: 600;
+  color: #2c3e50;
+}
+
+.carrinho-total {
+  background-color: #27ae60;
+  color: white;
+  padding: 6px 15px;
+  border-radius: 20px;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.carrinho-data {
+  color: #95a5a6;
+  font-size: 0.85rem;
+  font-style: italic;
+}
+
+/* Botões */
+.btn-remover {
+  background-color: #e74c3c;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  margin-left: 15px;
+}
+
+.btn-remover:hover {
+  background-color: #c0392b;
+  transform: translateY(-2px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.btn-remover:active {
+  transform: translateY(0);
+}
+
+/* Estados vazios */
+.lista-vazia {
+  text-align: center;
+  color: #7f8c8d;
+  padding: 40px 20px;
+  font-style: italic;
+  background: white;
+  border-radius: 12px;
+  margin-bottom: 30px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+  .admin-dashboard {
+    padding: 15px;
+  }
+  
+  .admin-dashboard h2 {
+    font-size: 2rem;
+  }
+  
+  .admin-dashboard h3 {
+    font-size: 1.5rem;
+  }
+  
+  .usuarios-lista li,
+  .carrinhos-lista li {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+  
+  .carrinho-info {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 5px;
+  }
+  
+  .btn-remover {
+    align-self: flex-end;
+    margin-left: 0;
+  }
+  
+  .item-info {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .admin-dashboard {
+    padding: 10px;
+  }
+  
+  .admin-dashboard h2 {
+    font-size: 1.8rem;
+  }
+  
+  .usuario-info {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+  
+  .usuario-email,
+  .usuario-tipo {
+    margin-left: 0;
+  }
+}
