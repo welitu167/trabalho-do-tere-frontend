@@ -1,0 +1,26 @@
+[
+  {
+    "_id": "p1",
+    "nome": "Camiseta Verde",
+    "preco": 49.9,
+    "descricao": "Camiseta 100% algodão - verde oliva",
+    "urlfoto": "https://images.unsplash.com/photo-1512436991641-6745cdb1723f?w=800&q=80",
+    "categoria": "Roupas"
+  },
+  {
+    "_id": "p2",
+    "nome": "Caneca Azul",
+    "preco": 29.5,
+    "descricao": "Caneca cerâmica 350ml",
+    "urlfoto": "https://images.unsplash.com/photo-1519643381401-22c77e60520e?w=800&q=80",
+    "categoria": "Acessórios"
+  },
+  {
+    "_id": "p3",
+    "nome": "Boné Preto",
+    "preco": 39.0,
+    "descricao": "Boné unissex estilo snapback",
+    "urlfoto": "https://images.unsplash.com/photo-1520975918814-3d4f7f3b74b5?w=800&q=80",
+    "categoria": "Acessórios"
+  }
+]

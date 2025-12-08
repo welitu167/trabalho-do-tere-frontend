@@ -6,10 +6,6 @@ import App from './App.tsx'
 import Login from './componentes/login/login.tsx'
 import AdminDashboard from './componentes/admin/AdminDashboard.tsx'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
-import Checkout from '@/pages/checkout.tsx'
-import {Elements } from '@stripe/react-stripe-js';
-import {loadStripe} from '@stripe/stripe-js';
-const stripe = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY); //chave publica
 
 // Cast the imported AdminDashboard to a React component type in case its export is untyped
 const AdminDashboardComponent = (AdminDashboard as unknown) as React.ComponentType<any>
@@ -37,7 +33,6 @@ createRoot(document.getElementById('root')!).render(
               </AdminRoute>
             } 
           />
-        <Route path="/finalizar-compra" element={ <Elements stripe={stripe}><Componente que tenha o cartão/></Elements>} />
       </Routes>
     </BrowserRouter>
   </StrictMode>,

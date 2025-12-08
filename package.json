@@ -13,8 +13,9 @@
   "description": "",
   "type": "module",
   "dependencies": {
+    "@stripe/react-stripe-js": "^5.4.1",
+    "@stripe/stripe-js": "^8.5.3",
     "@types/react": "^19.2.2",
-    
     "axios": "^1.13.1",
     "bson": "^6.10.4",
     "dotenv": "^17.2.1",
