@@ -16,7 +16,8 @@ if (!PUBLISHABLE_KEY || PUBLISHABLE_KEY.includes('YOUR_PUBLISHABLE_KEY')) {
   const stripe = Stripe(PUBLISHABLE_KEY);
 
   // Base API URL (ajuste para seu backend em desenvolvimento)
-  const API_BASE = 'http://localhost:8000';
+  // Pode ser configurada em tempo de execução via `window.__API_BASE__` ou `localStorage.setItem('VITE_API_URL', url)`
+  const API_BASE = (typeof window !== 'undefined' && window.__API_BASE__) || localStorage.getItem('VITE_API_URL') || (typeof VITE_API_URL !== 'undefined' ? VITE_API_URL : null) || 'http://localhost:8000';
 
   // helper: parse response and handle errors properly
   function parseJsonOrThrow(res) {
@@ -237,7 +238,12 @@ if (!PUBLISHABLE_KEY || PUBLISHABLE_KEY.includes('YOUR_PUBLISHABLE_KEY')) {
       })
       .catch(err => {
         console.error('Erro ao carregar carrinho:', err);
-        errorEl.textContent = `Erro ao carregar carrinho: ${err.message}`;
+        const msg = (err && err.message) ? err.message : String(err);
+        if (msg.includes('Failed to fetch') || msg.includes('NetworkError') || msg.includes('ECONNREFUSED') || msg.includes('ERR_CONNECTION_REFUSED')) {
+          errorEl.textContent = `Falha de conexão: não foi possível conectar ao backend em ${API_BASE}. Verifique se o servidor está rodando (ex.: execute o backend com \`npm run dev\`) e se a porta/host estão corretos.`;
+        } else {
+          errorEl.textContent = `Erro ao carregar carrinho: ${msg}`;
+        }
         submitButton.disabled = true;
       });
   }
