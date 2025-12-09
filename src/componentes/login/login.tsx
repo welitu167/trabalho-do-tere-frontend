@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../../api/api';
-import './Login.css';
+import './login.css';
 
 interface LoginResponse {
     token: string;
