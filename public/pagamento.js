@@ -15,80 +15,230 @@ if (!PUBLISHABLE_KEY || PUBLISHABLE_KEY.includes('YOUR_PUBLISHABLE_KEY')) {
 } else {
   const stripe = Stripe(PUBLISHABLE_KEY);
 
-  // Try to get cart info from the backend /carrinho endpoint
-  // Include Authorization header if user is logged-in (token in localStorage)
-  const token = localStorage.getItem('token');
-  const authHeaders = token ? { Authorization: `Bearer ${token}` } : {};
-  fetch('/carrinho', { headers: { ...authHeaders } })
-    .then(r => r.json())
-    .then(async (carrinho) => {
-      if (!carrinho || !carrinho.itens) {
-        infoEl.textContent = 'Carrinho vazio. Adicione produtos antes de pagar.';
-        submitButton.disabled = true;
-        return;
-      }
+  // Base API URL (ajuste para seu backend em desenvolvimento)
+  const API_BASE = 'http://localhost:8000';
 
-      // show summary
-      const total = carrinho.total ?? carrinho.itens.reduce((acc,item)=> acc + item.precoUnitario * item.quantidade, 0);
-      summaryEl.innerHTML = `<p><strong>Total:</strong> R$ ${total}</p>`;
-
-      // Create PaymentIntent on server (card payments)
-      const amountInCents = Math.round(Number(total) * 100);
-      fetch('/create-payment-intent', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', ...authHeaders },
-        body: JSON.stringify({ amount: amountInCents, currency: 'brl' })
-      })
-        .then(res => res.json())
-        .then(async (data) => {
-          if (data.error) {
-            errorEl.textContent = data.error;
-            return;
-          }
-
-          const clientSecret = data.clientSecret;
-          // Use Stripe Elements with a Card Element for explicit card payments
-          const elements = stripe.elements({ clientSecret });
-          const cardElement = elements.create('card');
-          cardElement.mount('#payment-element');
-
-          submitButton.addEventListener('click', async () => {
-            submitButton.disabled = true;
-            errorEl.textContent = '';
-            paymentMessage.textContent = 'Processando pagamento...';
-
-            try {
-              const result = await stripe.confirmCardPayment(clientSecret, {
-                payment_method: { card: cardElement }
-              });
-
-              if (result.error) {
-                errorEl.textContent = result.error.message || 'Erro ao processar pagamento.';
-                paymentMessage.textContent = '';
-                submitButton.disabled = false;
-              } else if (result.paymentIntent && result.paymentIntent.status === 'succeeded') {
-                paymentMessage.textContent = 'Pagamento realizado com sucesso! Redirecionando...';
-                // optional: redirect to success page
-                setTimeout(() => window.location.href = '/pagamento-success.html', 1200);
-              } else {
-                paymentMessage.textContent = 'Pagamento processado. Verifique seu extrato.';
-              }
-            } catch (err) {
-              console.error(err);
-              errorEl.textContent = 'Erro ao processar o pagamento.';
-              paymentMessage.textContent = '';
-              submitButton.disabled = false;
-            }
-          });
+  // helper: parse response and handle errors properly
+  function parseJsonOrThrow(res) {
+    const contentType = res.headers.get('content-type') || '';
+    
+    // For non-OK responses, extract error message
+    if (!res.ok) {
+      // Always try to parse as JSON first (our backend returns JSON errors)
+      return res.json()
+        .then(data => {
+          const errorMsg = data.mensagem || data.error || data.message || JSON.stringify(data);
+          throw new Error(`HTTP ${res.status}: ${errorMsg}`);
         })
         .catch(err => {
-          console.error(err);
-          errorEl.textContent = 'Erro ao criar PaymentIntent. Veja console.';
+          // If JSON parsing fails, it means the response is not JSON
+          if (err.message && err.message.startsWith('HTTP')) {
+            throw err; // Re-throw our custom error
+          }
+          // Try to get text response
+          return res.text().then(text => {
+            throw new Error(`HTTP ${res.status}: ${text.substring(0, 200)}`);
+          });
         });
-    })
-    .catch(err => {
-      console.error(err);
-      infoEl.textContent = 'Erro ao carregar carrinho. Faça login ou verifique o backend.';
-      submitButton.disabled = true;
-    });
+    }
+
+    // For OK responses, parse as JSON
+    return res.json()
+      .catch(e => {
+        throw new Error(`Erro ao fazer parse de JSON da resposta: ${e.message}`);
+      });
+  }
+
+  // Try to get cart info from the backend /carrinho endpoint
+  const token = localStorage.getItem('token');
+
+  if (!token) {
+    infoEl.textContent = 'Você precisa estar logado para acessar o pagamento.';
+    submitButton.disabled = true;
+  } else {
+    const authHeaders = { Authorization: `Bearer ${token}` };
+    
+    fetch(`${API_BASE}/carrinho`, { headers: { ...authHeaders } })
+      .then(parseJsonOrThrow)
+      .then(async (carrinho) => {
+        if (!carrinho || !carrinho.itens || carrinho.itens.length === 0) {
+          infoEl.textContent = 'Carrinho vazio. Adicione produtos antes de pagar.';
+          submitButton.disabled = true;
+          return;
+        }
+
+        // Calculate total - ensure it's a valid number
+        let total = carrinho.total;
+        if (!total || isNaN(total)) {
+          total = carrinho.itens.reduce((acc, item) => acc + (item.precoUnitario || 0) * (item.quantidade || 0), 0);
+        }
+        
+        // Validate total is a positive number
+        if (total <= 0) {
+          infoEl.textContent = 'Carrinho inválido: total deve ser maior que zero.';
+          submitButton.disabled = true;
+          return;
+        }
+
+        // Show summary with all items including images
+        let itemsHtml = '<div class="cart-items"><h3>Itens do Carrinho</h3><table><thead><tr><th>Foto</th><th>Produto</th><th>Quantidade</th><th>Preço Unit.</th><th>Subtotal</th></tr></thead><tbody>';
+        
+        carrinho.itens.forEach(item => {
+          const preco = item.precoUnitario || 0;
+          const qtd = item.quantidade || 0;
+          const subtotal = preco * qtd;
+          const nomeProduto = item.nome || item.nomeProduto || 'Produto desconhecido';
+          const fotoProduto = item.foto || item.imagem || item.foto_url || '';
+          
+          const fotoHtml = fotoProduto 
+            ? `<img src="${fotoProduto}" alt="${nomeProduto}" style="max-width: 60px; max-height: 60px; object-fit: cover; border-radius: 4px;">`
+            : '<span style="color: #999;">Sem foto</span>';
+          
+          itemsHtml += `<tr>
+            <td style="text-align: center;">${fotoHtml}</td>
+            <td>${nomeProduto}</td>
+            <td>${qtd}</td>
+            <td>R$ ${preco.toFixed(2)}</td>
+            <td>R$ ${subtotal.toFixed(2)}</td>
+          </tr>`;
+        });
+        
+        itemsHtml += `</tbody></table></div><div class="cart-total"><p><strong>Total:</strong> R$ ${total.toFixed(2)}</p></div>`;
+        summaryEl.innerHTML = itemsHtml;
+
+        // Payment method selection
+        let paymentMethodHtml = `
+          <fieldset style="margin:12px 0;">
+            <legend>Opção de pagamento</legend>
+            <label style="display: block; margin-bottom: 10px;">
+              <input type="radio" name="payment-method" value="credit_card" checked> Cartão de Crédito
+            </label>
+            <label style="display: block; margin-bottom: 10px;">
+              <input type="radio" name="payment-method" value="debit_card"> Cartão de Débito
+            </label>
+            <label style="display: block; margin-bottom: 10px;">
+              <input type="radio" name="payment-method" value="pix"> PIX
+            </label>
+          </fieldset>
+        `;
+        
+        const paymentMethodsEl = document.querySelector('fieldset') || summaryEl.parentElement.insertBefore(document.createElement('div'), summaryEl.nextElementSibling);
+        paymentMethodsEl.innerHTML = paymentMethodHtml;
+
+        // Get selected payment method
+        function getSelectedPaymentMethod() {
+          const selected = document.querySelector('input[name="payment-method"]:checked');
+          return selected ? selected.value : 'credit_card';
+        }
+
+        // Create PaymentIntent on server (card payments)
+        const amountInCents = Math.round(total * 100);
+        
+        console.log('Enviando para /create-payment-intent:', { amount: amountInCents, currency: 'brl' });
+
+        fetch(`${API_BASE}/create-payment-intent`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', ...authHeaders },
+          body: JSON.stringify({ amount: amountInCents, currency: 'brl' })
+        })
+          .then(parseJsonOrThrow)
+          .then(async (data) => {
+            // Verify we got the expected response
+            if (!data.clientSecret) {
+              errorEl.textContent = 'Erro: Resposta inválida do servidor (sem clientSecret).';
+              submitButton.disabled = true;
+              return;
+            }
+
+            const clientSecret = data.clientSecret;
+            
+            // Setup payment elements based on selected method
+            submitButton.addEventListener('click', async () => {
+              const paymentMethod = getSelectedPaymentMethod();
+              submitButton.disabled = true;
+              errorEl.textContent = '';
+              paymentMessage.textContent = 'Processando pagamento...';
+
+              try {
+                if (paymentMethod === 'pix') {
+                  // PIX payment flow
+                  const result = await stripe.confirmPayment({
+                    clientSecret: clientSecret,
+                    confirmParams: {
+                      payment_method: {
+                        type: 'klarna'
+                      },
+                      return_url: `${window.location.origin}/pagamento-success.html`
+                    }
+                  });
+
+                  if (result.error) {
+                    errorEl.textContent = result.error.message || 'Erro ao processar pagamento PIX.';
+                    paymentMessage.textContent = '';
+                    submitButton.disabled = false;
+                  }
+                } else {
+                  // Credit/Debit card payment flow
+                  const elements = stripe.elements({ clientSecret });
+                  const cardElement = elements.create('card');
+                  cardElement.mount('#payment-element');
+
+                  const result = await stripe.confirmCardPayment(clientSecret, {
+                    payment_method: { card: cardElement }
+                  });
+
+                  if (result.error) {
+                    errorEl.textContent = result.error.message || 'Erro ao processar pagamento.';
+                    paymentMessage.textContent = '';
+                    submitButton.disabled = false;
+                  } else if (result.paymentIntent && result.paymentIntent.status === 'succeeded') {
+                    paymentMessage.textContent = 'Pagamento realizado com sucesso! Redirecionando...';
+                    setTimeout(() => window.location.href = '/pagamento-success.html', 1200);
+                  } else {
+                    paymentMessage.textContent = 'Pagamento processado. Verifique seu extrato.';
+                  }
+                }
+              } catch (err) {
+                console.error(err);
+                errorEl.textContent = 'Erro ao processar o pagamento.';
+                paymentMessage.textContent = '';
+                submitButton.disabled = false;
+              }
+            });
+
+            // Show card element only for card payments initially
+            const paymentElementDiv = document.getElementById('payment-element');
+            const radioButtons = document.querySelectorAll('input[name="payment-method"]');
+            
+            radioButtons.forEach(radio => {
+              radio.addEventListener('change', () => {
+                const selectedMethod = getSelectedPaymentMethod();
+                if (selectedMethod === 'pix') {
+                  paymentElementDiv.innerHTML = '<p style="color: #0066cc; font-weight: bold;">Você será redirecionado para confirmar o pagamento PIX</p>';
+                } else {
+                  paymentElementDiv.innerHTML = '<!-- Card Element will mount here -->';
+                  const elements = stripe.elements({ clientSecret });
+                  const cardElement = elements.create('card');
+                  cardElement.mount('#payment-element');
+                }
+              });
+            });
+
+            // Mount card element initially
+            const elements = stripe.elements({ clientSecret });
+            const cardElement = elements.create('card');
+            cardElement.mount('#payment-element');
+          })
+          .catch(err => {
+            console.error('Erro ao criar PaymentIntent:', err);
+            errorEl.textContent = `Erro ao criar PaymentIntent: ${err.message}`;
+            submitButton.disabled = true;
+          });
+      })
+      .catch(err => {
+        console.error('Erro ao carregar carrinho:', err);
+        errorEl.textContent = `Erro ao carregar carrinho: ${err.message}`;
+        submitButton.disabled = true;
+      });
+  }
 }
