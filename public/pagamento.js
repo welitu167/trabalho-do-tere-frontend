@@ -13,21 +13,41 @@ const PUBLISHABLE_KEY = (
   null
 );
 
+// Base API URL (ajuste para seu backend em desenvolvimento)
+// Pode ser configurada em tempo de execução via `window.__API_BASE__` ou `localStorage.setItem('VITE_API_URL', url)`
+const API_BASE = (typeof window !== 'undefined' && window.__API_BASE__) || (typeof localStorage !== 'undefined' && localStorage.getItem('VITE_API_URL')) || (typeof VITE_API_URL !== 'undefined' ? VITE_API_URL : null) || 'http://localhost:8000';
+
 const infoEl = document.getElementById('info');
 const summaryEl = document.getElementById('summary');
 const errorEl = document.getElementById('error-message');
 const paymentMessage = document.getElementById('payment-message');
 const submitButton = document.getElementById('submit');
 
-if (!PUBLISHABLE_KEY || PUBLISHABLE_KEY.includes('YOUR_PUBLISHABLE_KEY')) {
-  errorEl.textContent = 'Insira a Stripe Publishable Key em /public/pagamento.js antes de testar.';
-  submitButton.disabled = true;
-} else {
-  const stripe = Stripe(PUBLISHABLE_KEY);
+// Initialize: ensure we have a publishable key (try local sources, then ask backend)
+(async function init() {
+  let publishable = PUBLISHABLE_KEY;
+  if (!publishable || publishable.includes('YOUR_PUBLISHABLE_KEY')) {
+    try {
+      const cfgRes = await fetch(`${API_BASE}/config`);
+      if (cfgRes.ok) {
+        const cfg = await cfgRes.json();
+        publishable = cfg && cfg.publishableKey ? cfg.publishableKey : publishable;
+        console.debug('Obtido publishableKey do backend /config');
+      } else {
+        console.warn('/config retornou não-ok:', cfgRes.status);
+      }
+    } catch (e) {
+      console.warn('Falha ao buscar /config:', e.message || e);
+    }
+  }
 
-  // Base API URL (ajuste para seu backend em desenvolvimento)
-  // Pode ser configurada em tempo de execução via `window.__API_BASE__` ou `localStorage.setItem('VITE_API_URL', url)`
-  const API_BASE = (typeof window !== 'undefined' && window.__API_BASE__) || localStorage.getItem('VITE_API_URL') || (typeof VITE_API_URL !== 'undefined' ? VITE_API_URL : null) || 'http://localhost:8000';
+  if (!publishable) {
+    errorEl.textContent = 'Insira a Stripe Publishable Key (pk_...) ou configure o backend (/config).';
+    submitButton.disabled = true;
+    return;
+  }
+
+  const stripe = Stripe(publishable);
 
   // helper: parse response and handle errors properly
   function parseJsonOrThrow(res) {
@@ -242,4 +262,4 @@ if (!PUBLISHABLE_KEY || PUBLISHABLE_KEY.includes('YOUR_PUBLISHABLE_KEY')) {
         submitButton.disabled = true;
       });
   }
-}
+})();
