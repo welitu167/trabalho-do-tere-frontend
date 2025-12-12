@@ -9,8 +9,8 @@ const PUBLISHABLE_KEY = (
   (typeof localStorage !== 'undefined' && localStorage.getItem('VITE_STRIPE_PUBLIC_KEY')) ||
   // Vite build-time variable (if the file is processed by Vite during build)
   (typeof VITE_STRIPE_PUBLIC_KEY !== 'undefined' ? VITE_STRIPE_PUBLIC_KEY : null) ||
-  // fallback: empty (we'll show an error if missing)
-  null
+  // fallback: use the key from .env
+  'pk_test_51Sc3t5BsbXG9g7OzLocc7NmkY3cDYNwpy8YkxxpRp5ye5giimIonkZ56LIVPmU2XEDOf48x4aro4cts6gvs6xEH900HflEDbU5'
 );
 
 // Base API URL (ajuste para seu backend em desenvolvimento)
