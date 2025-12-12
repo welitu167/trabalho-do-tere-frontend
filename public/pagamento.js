@@ -117,9 +117,6 @@ if (!PUBLISHABLE_KEY || PUBLISHABLE_KEY.includes('YOUR_PUBLISHABLE_KEY')) {
             <label style="display: block; margin-bottom: 10px;">
               <input type="radio" name="payment-method" value="debit_card"> Cartão de Débito
             </label>
-            <label style="display: block; margin-bottom: 10px;">
-              <input type="radio" name="payment-method" value="pix"> PIX
-            </label>
           </fieldset>
         `;
         
@@ -161,43 +158,24 @@ if (!PUBLISHABLE_KEY || PUBLISHABLE_KEY.includes('YOUR_PUBLISHABLE_KEY')) {
               paymentMessage.textContent = 'Processando pagamento...';
 
               try {
-                if (paymentMethod === 'pix') {
-                  // PIX payment flow
-                  const result = await stripe.confirmPayment({
-                    clientSecret: clientSecret,
-                    confirmParams: {
-                      payment_method: {
-                        type: 'klarna'
-                      },
-                      return_url: `${window.location.origin}/pagamento-success.html`
-                    }
-                  });
+                // Credit/Debit card payment flow
+                const elements = stripe.elements({ clientSecret });
+                const cardElement = elements.create('card');
+                cardElement.mount('#payment-element');
 
-                  if (result.error) {
-                    errorEl.textContent = result.error.message || 'Erro ao processar pagamento PIX.';
-                    paymentMessage.textContent = '';
-                    submitButton.disabled = false;
-                  }
+                const result = await stripe.confirmCardPayment(clientSecret, {
+                  payment_method: { card: cardElement }
+                });
+
+                if (result.error) {
+                  errorEl.textContent = result.error.message || 'Erro ao processar pagamento.';
+                  paymentMessage.textContent = '';
+                  submitButton.disabled = false;
+                } else if (result.paymentIntent && result.paymentIntent.status === 'succeeded') {
+                  paymentMessage.textContent = 'Pagamento realizado com sucesso! Redirecionando...';
+                  setTimeout(() => window.location.href = '/pagamento-success.html', 1200);
                 } else {
-                  // Credit/Debit card payment flow
-                  const elements = stripe.elements({ clientSecret });
-                  const cardElement = elements.create('card');
-                  cardElement.mount('#payment-element');
-
-                  const result = await stripe.confirmCardPayment(clientSecret, {
-                    payment_method: { card: cardElement }
-                  });
-
-                  if (result.error) {
-                    errorEl.textContent = result.error.message || 'Erro ao processar pagamento.';
-                    paymentMessage.textContent = '';
-                    submitButton.disabled = false;
-                  } else if (result.paymentIntent && result.paymentIntent.status === 'succeeded') {
-                    paymentMessage.textContent = 'Pagamento realizado com sucesso! Redirecionando...';
-                    setTimeout(() => window.location.href = '/pagamento-success.html', 1200);
-                  } else {
-                    paymentMessage.textContent = 'Pagamento processado. Verifique seu extrato.';
-                  }
+                  paymentMessage.textContent = 'Pagamento processado. Verifique seu extrato.';
                 }
               } catch (err) {
                 console.error(err);
@@ -214,14 +192,10 @@ if (!PUBLISHABLE_KEY || PUBLISHABLE_KEY.includes('YOUR_PUBLISHABLE_KEY')) {
             radioButtons.forEach(radio => {
               radio.addEventListener('change', () => {
                 const selectedMethod = getSelectedPaymentMethod();
-                if (selectedMethod === 'pix') {
-                  paymentElementDiv.innerHTML = '<p style="color: #0066cc; font-weight: bold;">Você será redirecionado para confirmar o pagamento PIX</p>';
-                } else {
-                  paymentElementDiv.innerHTML = '<!-- Card Element will mount here -->';
-                  const elements = stripe.elements({ clientSecret });
-                  const cardElement = elements.create('card');
-                  cardElement.mount('#payment-element');
-                }
+                paymentElementDiv.innerHTML = '<!-- Card Element will mount here -->';
+                const elements = stripe.elements({ clientSecret });
+                const cardElement = elements.create('card');
+                cardElement.mount('#payment-element');
               });
             });
 
