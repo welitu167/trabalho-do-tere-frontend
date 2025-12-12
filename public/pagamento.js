@@ -1,7 +1,17 @@
 // pagamento.js
 // Payment Elements for the frontend project (static page)
-// IMPORTANT: Publishable Key inserida (pk_... ). Nunca coloque a Secret Key no frontend.
-const PUBLISHABLE_KEY = 'pk_test_51SXKK1GploZpoTypWYAJBQH3ChgupCFNGP83G6ZlWM9JwoXEnM4y18uIGuY4l7K3sVLFszKhh3ugoREjWtr6faQu00YAQixW8q';
+// IMPORTANT: Publishable Key (pk_...) - nunca coloque a Secret Key no frontend.
+// Try to read the publishable key from several sources so builds and local tests work.
+const PUBLISHABLE_KEY = (
+  // explicit runtime injection (useful for embeds)
+  (typeof window !== 'undefined' && (window.__STRIPE_PUBLISHABLE__ || window.__VITE_STRIPE_PUBLIC_KEY__)) ||
+  // saved in localStorage for quick testing
+  (typeof localStorage !== 'undefined' && localStorage.getItem('VITE_STRIPE_PUBLIC_KEY')) ||
+  // Vite build-time variable (if the file is processed by Vite during build)
+  (typeof VITE_STRIPE_PUBLIC_KEY !== 'undefined' ? VITE_STRIPE_PUBLIC_KEY : null) ||
+  // fallback: empty (we'll show an error if missing)
+  null
+);
 
 const infoEl = document.getElementById('info');
 const summaryEl = document.getElementById('summary');
