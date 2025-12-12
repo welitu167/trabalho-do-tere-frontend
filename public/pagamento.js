@@ -141,16 +141,39 @@ if (!PUBLISHABLE_KEY || PUBLISHABLE_KEY.includes('YOUR_PUBLISHABLE_KEY')) {
         })
           .then(parseJsonOrThrow)
           .then(async (data) => {
-            // Verify we got the expected response
-            if (!data.clientSecret) {
+            // Debug: log server response
+            console.debug('Resposta /create-payment-intent:', data);
+
+            // Verify we got the expected response (client_secret must contain "_secret_")
+            const clientSecret = data && (data.clientSecret || data.client_secret || data.client_secret_value || data.id);
+            if (!clientSecret) {
               errorEl.textContent = 'Erro: Resposta inválida do servidor (sem clientSecret).';
               submitButton.disabled = true;
               return;
             }
 
-            const clientSecret = data.clientSecret;
-            
-            // Setup payment elements based on selected method
+            if (!String(clientSecret).includes('_secret_')) {
+              console.error('clientSecret parece inválido (pode ser o id em vez do client_secret):', clientSecret);
+              errorEl.textContent = 'Erro: servidor retornou um clientSecret inválido. Verifique o backend (deve retornar paymentIntent.client_secret).';
+              submitButton.disabled = true;
+              return;
+            }
+
+            // Create Elements and mount the Card element once, then reuse it on submit.
+            let elements = null;
+            let cardElement = null;
+            try {
+              elements = stripe.elements({ clientSecret });
+              cardElement = elements.create('card');
+              cardElement.mount('#payment-element');
+            } catch (e) {
+              console.error('Erro ao inicializar Elements:', e);
+              errorEl.textContent = 'Erro ao inicializar o formulário de pagamento.';
+              submitButton.disabled = true;
+              return;
+            }
+
+            // Submit handler uses the mounted card element (do not recreate it here)
             submitButton.addEventListener('click', async () => {
               const paymentMethod = getSelectedPaymentMethod();
               submitButton.disabled = true;
@@ -158,11 +181,6 @@ if (!PUBLISHABLE_KEY || PUBLISHABLE_KEY.includes('YOUR_PUBLISHABLE_KEY')) {
               paymentMessage.textContent = 'Processando pagamento...';
 
               try {
-                // Credit/Debit card payment flow
-                const elements = stripe.elements({ clientSecret });
-                const cardElement = elements.create('card');
-                cardElement.mount('#payment-element');
-
                 const result = await stripe.confirmCardPayment(clientSecret, {
                   payment_method: { card: cardElement }
                 });
@@ -185,24 +203,17 @@ if (!PUBLISHABLE_KEY || PUBLISHABLE_KEY.includes('YOUR_PUBLISHABLE_KEY')) {
               }
             });
 
-            // Show card element only for card payments initially
+            // Keep card mounted when switching radio options; do not recreate unnecessarily.
             const paymentElementDiv = document.getElementById('payment-element');
             const radioButtons = document.querySelectorAll('input[name="payment-method"]');
-            
             radioButtons.forEach(radio => {
               radio.addEventListener('change', () => {
-                const selectedMethod = getSelectedPaymentMethod();
-                paymentElementDiv.innerHTML = '<!-- Card Element will mount here -->';
-                const elements = stripe.elements({ clientSecret });
-                const cardElement = elements.create('card');
-                cardElement.mount('#payment-element');
+                // If you need to change the element type, unmount and recreate here.
+                // For now we keep a single Card element for both credit/debit options.
+                paymentElementDiv.innerHTML = '';
+                if (cardElement) cardElement.mount('#payment-element');
               });
             });
-
-            // Mount card element initially
-            const elements = stripe.elements({ clientSecret });
-            const cardElement = elements.create('card');
-            cardElement.mount('#payment-element');
           })
           .catch(err => {
             console.error('Erro ao criar PaymentIntent:', err);
